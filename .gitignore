@@ -15,3 +15,5 @@
 *.war
 *.ear
 
+# IntelliJ #
+.idea
