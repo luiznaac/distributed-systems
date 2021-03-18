@@ -27,7 +27,7 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
     
     @Override
     public void notifyPeer(String notification) throws RemoteException {
-        System.out.println("Olá. Este é o peer " + this.peerName + "e a mensagem é: " + notification);
+        System.out.println("Olá. Este é o peer " + this.peerName + " e a mensagem é: " + notification);
     }
     
     @Override

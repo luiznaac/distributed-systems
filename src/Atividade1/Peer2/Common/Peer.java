@@ -10,15 +10,11 @@ import java.util.List;
 
 public class Peer {
     public static void main(String[] args) throws RemoteException, NotBoundException{
-//        //Pegando registro em localHost e porta 1099 (Padrão)
-//        Registry namesServiceReference = LocateRegistry.getRegistry(1099);
-//        
-//        //Verifica de registro é nulo. Se sim, cria um novo registro
-//        if (namesServiceReference == null) {
-//            namesServiceReference = LocateRegistry.createRegistry(1099);
-//        }
+
         Registry namesServiceReference;
         
+        //Tentando criar registro em localHost e porta 1099 (Padrão)
+        //Se lançar a exceção é porque já existe esse registro. Então pega o bicho
         try {
             namesServiceReference = LocateRegistry.createRegistry(1099);
         } catch(ExportException e) {
@@ -27,6 +23,8 @@ public class Peer {
         //Inicializa interface do próprio Peer, para registrar no serviço de nomes
         InterfacePeer localPeerReference = new InterfacePeerImplementation("Peer2");
         namesServiceReference.rebind(localPeerReference.getPeerName(), localPeerReference);
+        
+        
         
         //Pegando referência da interface remota de Peer1
         List<InterfacePeer> listOfPeers = new ArrayList<>();
