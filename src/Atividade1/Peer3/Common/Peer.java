@@ -37,7 +37,7 @@ public class Peer {
         
     public void initilizeLocalReference() throws RemoteException {
         //Inicializa interface do próprio Peer, para registrar no serviço de nomes
-        this.localPeerReference = new InterfacePeerImplementation("Peer2");
+        this.localPeerReference = new InterfacePeerImplementation("Peer3");
         this.namesServiceReference.rebind(this.localPeerReference.getPeerName(), this.localPeerReference);
     }
     

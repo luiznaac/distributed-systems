@@ -1,16 +1,16 @@
 package Common;
 
-public class Account2 {
-    private static Account2 instance;
+public class Account1 {
+    private static Account1 instance;
     private int balance;
     
-    private Account2() {
+    private Account1() {
         balance = 0;
     }
     
-    public static synchronized Account2 getInstance() {
+    public static synchronized Account1 getInstance() {
         if (instance == null) {
-            instance = new Account2();
+            instance = new Account1();
         }
         return instance;
     }
