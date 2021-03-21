@@ -56,6 +56,7 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
         for (InterfacePeer peer : this.lineAccount1.values()) {
             peer.answerPeerAccount1();
         }
+        this.lineAccount1.values().clear();
     }
          
     @Override
@@ -77,6 +78,7 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
         for (InterfacePeer peer : this.lineAccount2.values()) {
             peer.answerPeerAccount2();
         }
+        this.lineAccount2.values().clear();
     }
     
     @Override
