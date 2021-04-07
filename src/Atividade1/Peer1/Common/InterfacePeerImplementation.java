@@ -16,8 +16,6 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
     private AccountState account1State;
     private AccountState account2State;
     
-    public InterfacePeerImplementation() throws RemoteException {}
-    
     public InterfacePeerImplementation(String peerName) throws RemoteException {
         this.peerName = peerName;
         this.lineAccount1 = new LinkedHashMap<>();
@@ -33,11 +31,6 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
     }
         
     @Override
-    public void notifyPeer(String notification) throws RemoteException {
-        System.out.println("Olá. Este é o peer " + this.peerName + " e a mensagem é: " + notification);
-    }
-    
-    @Override
     public void registerPublicKey(InterfacePeer peerReference, PublicKey publicKey) throws RemoteException {
         peerPublicKeys.put(peerReference, publicKey);
     }
@@ -48,14 +41,10 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
             if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
                 return false;
             }
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SignatureException ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         if (this.account1State == AccountState.RELEASED) {
             return true;
         }
@@ -69,11 +58,7 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
             if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
                 return;
             }
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SignatureException ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -99,14 +84,10 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
             if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
                 return false;
             }
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SignatureException ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         if (this.account2State == AccountState.RELEASED) {
             return true;
         }
@@ -120,21 +101,17 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
             if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
                 return;
             }
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SignatureException ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
-                
+
         Peer.numberOfAnswers++;
     }
     
     @Override
     public void releaseFirstPeerFromLine2(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
         for (InterfacePeer peer : this.lineAccount2.values()) {
-            peer.answerPeerAccount1(peerReference, message, digitalSignature);
+            peer.answerPeerAccount2(peerReference, message, digitalSignature);
         }
         this.lineAccount2.values().clear();
     }
@@ -150,12 +127,6 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
         client_signature.initVerify(public_key);
         client_signature.update(message.getBytes());
 
-        if (client_signature.verify(signature)) {
-//            System.out.println("A Mensagem recebida foi assinada corretamente.");
-            return true;
-        }
-
-//        System.out.println("A Mensagem recebida NÃO pode ser validada.");
-        return false;
+        return client_signature.verify(signature);
     }
 }
