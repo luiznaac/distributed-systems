@@ -20,7 +20,7 @@ public class Peer {
         registeredPeers = new HashMap<>();
         numberOfAnswers = 0;
         numberOfAnswersToAccessResource = 0;
-        my_key_pair = (new KeyPairBuilder()).build();
+        myKeyPair = (new KeyPairBuilder()).build();
     }
         
     private InterfacePeer localPeerReference;
@@ -29,7 +29,7 @@ public class Peer {
     public static boolean gotAllAnswers;
     public static int numberOfAnswers;
     public static int numberOfAnswersToAccessResource;
-    private MyKeyPair my_key_pair;
+    private MyKeyPair myKeyPair;
     
     
     public void createRegistry() throws RemoteException {
@@ -58,30 +58,24 @@ public class Peer {
                 try {
                     InterfacePeer intefaceToAdd = (InterfacePeer) this.namesServiceReference.lookup(registeredPeer);
                     this.registeredPeers.put(registeredPeer, intefaceToAdd);
-                    intefaceToAdd.registerPublicKey(localPeerReference, my_key_pair.public_key);
+                    intefaceToAdd.registerPublicKey(localPeerReference, myKeyPair.public_key);
                 } catch (NotBoundException e) {
                     System.out.println(e);
                 }
             }
         }
     }
-    
-    public void pingPeer(InterfacePeer peer) throws RemoteException {
-        peer.notifyPeer("Oi, peer2. Aqui é o peer1."
-                    + "Preciso arrumar esta lista de peers. Adeus");
-    }
-    
-    public void askForAccessAcount1() throws RemoteException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+
+    public void askForAccessAccount1() throws RemoteException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         this.addRegisteredPeers();
         numberOfAnswers = 0;
         this.localPeerReference.setAccount1State(AccountState.WANTED);
+        // Ask for every peer if resource is available.
+        // If it is available, increment number of answers, otherwise register access intention
         for (InterfacePeer peer : registeredPeers.values()) {
-            if (!peer.getPeerName().equals(this.localPeerReference.getPeerName())) {
-                String message = "Aqui é o peer1. Quero acessar recurso 1";
-                if (peer.registerPeerAccount1(this.localPeerReference, message,
-                        signMessage(message, this.my_key_pair.private_key))) {
-                    numberOfAnswers++;
-                }
+            String message = "Aqui é o peer1. Quero acessar recurso 1";
+            if (peer.registerPeerAccount1(this.localPeerReference, message, signMessage(message, this.myKeyPair.private_key))) {
+                numberOfAnswers++;
             }
         }
     }
@@ -107,20 +101,22 @@ public class Peer {
         gotAllAnswers = true;
         this.localPeerReference.setAccount1State(AccountState.RELEASED);
         String message = "Aqui é o peer1. Recurso 1 liberado";
-        this.localPeerReference.releaseFirstPeerFromLine1(this.localPeerReference, message,
-                        signMessage(message, this.my_key_pair.private_key));
-        this.numberOfAnswers = 0;
+        this.localPeerReference.releaseFirstPeerFromLine1(
+            this.localPeerReference,
+            message,
+            signMessage(message, this.myKeyPair.private_key)
+        );
+        numberOfAnswers = 0;
     }
     
-    public void askForAccessAcount2() throws RemoteException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void askForAccessAccount2() throws RemoteException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         this.addRegisteredPeers();
         numberOfAnswers = 0;
         this.localPeerReference.setAccount2State(AccountState.WANTED);
         for (InterfacePeer peer : registeredPeers.values()) {
             if (!peer.getPeerName().equals(this.localPeerReference.getPeerName())) {
                 String message = "Aqui é o peer1. Quero acessar recurso 2";
-                if (peer.registerPeerAccount2(this.localPeerReference, message,
-                        signMessage(message, this.my_key_pair.private_key))) {
+                if (peer.registerPeerAccount2(this.localPeerReference, message, signMessage(message, this.myKeyPair.private_key))) {
                     numberOfAnswers++;
                 }
             }
@@ -148,9 +144,12 @@ public class Peer {
         gotAllAnswers = true;
         this.localPeerReference.setAccount2State(AccountState.RELEASED);
                 String message = "Aqui é o peer1. Recurso 2 liberado";
-        this.localPeerReference.releaseFirstPeerFromLine2(this.localPeerReference, message,
-                        signMessage(message, this.my_key_pair.private_key));
-        this.numberOfAnswers = 0;
+        this.localPeerReference.releaseFirstPeerFromLine2(
+            this.localPeerReference,
+            message,
+            signMessage(message, this.myKeyPair.private_key)
+        );
+        numberOfAnswers = 0;
     }
     
     public byte[] signMessage(String message, PrivateKey private_key)
@@ -163,7 +162,7 @@ public class Peer {
     }
 
     
-    public static void main(String[] args) throws RemoteException, NotBoundException, InterruptedException, NoSuchAlgorithmException, InvalidKeyException, SignatureException{
+    public static void main(String[] args) throws RemoteException, InterruptedException, NoSuchAlgorithmException, InvalidKeyException, SignatureException{
         Peer peer = new Peer();
         peer.createRegistry();
         peer.initilizeLocalReference();
@@ -171,7 +170,6 @@ public class Peer {
         
         gotAllAnswers = true;
         
-        System.out.println("Esperando outro peer.");
         while(true) {
             if (gotAllAnswers) {
                 gotAllAnswers = false;
@@ -179,14 +177,14 @@ public class Peer {
                 System.out.println("Qual recurso desejas acessar?");
                 switch (scan.nextInt()) {
                     case 1:
-                        peer.askForAccessAcount1();
+                        peer.askForAccessAccount1();
                         while(numberOfAnswers < numberOfAnswersToAccessResource - 1) {
                             sleep(200);
                         }
                         peer.accessAccount1();
                         break;
                     case 2:
-                        peer.askForAccessAcount2();
+                        peer.askForAccessAccount2();
                         while(numberOfAnswers < numberOfAnswersToAccessResource - 1) {
                             sleep(200);
                         }
