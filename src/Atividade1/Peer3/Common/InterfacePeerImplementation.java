@@ -2,60 +2,47 @@ package Common;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.LinkedHashMap;
 import java.security.*;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class InterfacePeerImplementation extends UnicastRemoteObject implements InterfacePeer{
-
-    private String peerName;
-    private LinkedHashMap<String, InterfacePeer> lineAccount1;
-    private LinkedHashMap<String, InterfacePeer> lineAccount2;
-    private LinkedHashMap<InterfacePeer, PublicKey> peerPublicKeys;
-    private AccountState account1State;
-    private AccountState account2State;
+    
+    public String peerName;
+    private LinkedHashMap<String, PublicKey> peerPublicKeys;
 
     public InterfacePeerImplementation(String peerName) throws RemoteException {
         this.peerName = peerName;
-        this.lineAccount1 = new LinkedHashMap<>();
-        this.lineAccount2 = new LinkedHashMap<>();
-        this.peerPublicKeys  = new LinkedHashMap<>();
-        this.account1State = AccountState.RELEASED;
-        this.account2State = AccountState.RELEASED;
+        this.peerPublicKeys = new LinkedHashMap<>();
+    }
+    
+    @Override
+    public void registerPublicKey(String peerName, PublicKey publicKey) throws RemoteException {
+        peerPublicKeys.put(peerName, publicKey);
     }
 
     @Override
-    public String getPeerName() throws RemoteException {
-        return this.peerName;
-    }
-
-    @Override
-    public void registerPublicKey(InterfacePeer peerReference, PublicKey publicKey) throws RemoteException {
-        peerPublicKeys.put(peerReference, publicKey);
-    }
-
-    @Override
-    public boolean registerPeerAccount1(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
+    public boolean registerPeerAccount1(String peerName, String message, byte[] digitalSignature) throws RemoteException {
         try {
-            if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
+            if (!verifyMessage(message, peerPublicKeys.get(peerName), digitalSignature)) {
                 return false;
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (this.account1State == AccountState.RELEASED) {
+        if (Account1.getInstance().state == AccountState.RELEASED) {
             return true;
         }
-        lineAccount1.put(peerReference.getPeerName(), peerReference);
+        Account1.getInstance().line.add(peerName);
         return false;
     }
 
     @Override
-    public void answerPeerAccount1(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
+    public void answerPeerAccount1(String peerName, String message, byte[] digitalSignature) throws RemoteException {
         try {
-            if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
+            if (!verifyMessage(message, peerPublicKeys.get(peerName), digitalSignature)) {
                 return;
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
@@ -66,39 +53,26 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
     }
 
     @Override
-    public void setAccount1State(AccountState state) throws RemoteException {
-        this.account1State = state;
-    }
-
-    @Override
-    public void releaseFirstPeerFromLine1(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
-        for (InterfacePeer peer : this.lineAccount1.values()) {
-            peer.answerPeerAccount1(peerReference, message, digitalSignature);
-        }
-        this.lineAccount1.values().clear();
-    }
-
-    @Override
-    public boolean registerPeerAccount2(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
+    public boolean registerPeerAccount2(String peerName, String message, byte[] digitalSignature) throws RemoteException {
         try {
-            if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
+            if (!verifyMessage(message, peerPublicKeys.get(peerName), digitalSignature)) {
                 return false;
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(InterfacePeerImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (this.account2State == AccountState.RELEASED) {
+        if (Account2.getInstance().state == AccountState.RELEASED) {
             return true;
         }
-        lineAccount2.put(peerReference.getPeerName(), peerReference);
+        Account2.getInstance().line.add(peerName);
         return false;
     }
 
     @Override
-    public void answerPeerAccount2(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
+    public void answerPeerAccount2(String peerName, String message, byte[] digitalSignature) throws RemoteException {
         try {
-            if (!verifyMessage(message, peerPublicKeys.get(peerReference), digitalSignature)) {
+            if (!verifyMessage(message, peerPublicKeys.get(peerName), digitalSignature)) {
                 return;
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
@@ -107,21 +81,8 @@ public class InterfacePeerImplementation extends UnicastRemoteObject implements 
 
         Peer.numberOfAnswers++;
     }
-
-    @Override
-    public void releaseFirstPeerFromLine2(InterfacePeer peerReference, String message, byte[] digitalSignature) throws RemoteException {
-        for (InterfacePeer peer : this.lineAccount2.values()) {
-            peer.answerPeerAccount2(peerReference, message, digitalSignature);
-        }
-        this.lineAccount2.values().clear();
-    }
-
-    @Override
-    public void setAccount2State(AccountState state) throws RemoteException {
-        this.account2State = state;
-    }
-
-    public boolean verifyMessage(String message, PublicKey public_key, byte[] signature)
+    
+    private boolean verifyMessage(String message, PublicKey public_key, byte[] signature)
             throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature client_signature = Signature.getInstance("DSA");
         client_signature.initVerify(public_key);
