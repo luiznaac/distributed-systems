@@ -1,6 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from time import sleep
 from threading import Thread
+import json
+import requests
+
+server_address = 'http://localhost:8080'
 
 port = None
 waiting_for_resource = False
@@ -11,23 +15,37 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/resource-available':
             set_resource_available()
+
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(bytes('Ok', "utf8"))
+        self.wfile.write(bytes(json.dumps({'message': 'ok'}), 'utf8'))
 
     def log_message(self, format, *args):
         pass
 
 
+def make_request_to_server(request, request_content):
+    global port
+    url = server_address + request
+    request_body = {**{'port': port}, **request_content}
+
+    response = requests.post(url, data=request_body)
+
+    return response.json()
+
+
 def check_resource_availability(resource):
     global waiting_for_resource, resource_available
-    if resource == 1:
-        waiting_for_resource = True
-        resource_available = False
+    response = make_request_to_server('/check-resource', {'resource': resource})
+    is_available = response['available']
+
+    if is_available:
+        resource_available = True
         return
 
-    resource_available = True
+    resource_available = False
+    waiting_for_resource = True
 
 
 def set_resource_available():
@@ -62,8 +80,8 @@ def run(server_class=HTTPServer, handler_class=Handler):
     client_thread = Thread(target=client_function)
     client_thread.start()
 
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
+    this_client_address = ('', port)
+    httpd = server_class(this_client_address, handler_class)
     httpd.serve_forever()
 
 
