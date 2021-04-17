@@ -54,23 +54,24 @@ def set_resource_available():
 
 
 def access_resource(resource):
-    global waiting_for_resource
     print('Accessing resource ' + str(resource))
-    waiting_for_resource = False
+    input('Enter something to free the resource ')
+    make_request_to_server('/free-resource', {'resource': resource})
 
 
 def client_function():
+    global waiting_for_resource
     desired_resource = None
     while True:
-        sleep(1)
-
         if not waiting_for_resource:
-            desired_resource = int(input('Qual recurso desejas acessar? '))
+            desired_resource = int(input('Which resource do you wish to access? '))
             check_resource_availability(desired_resource)
 
         if resource_available:
             access_resource(desired_resource)
-            continue
+            waiting_for_resource = False
+
+        sleep(0.5)
 
 
 def run(server_class=HTTPServer, handler_class=Handler):
