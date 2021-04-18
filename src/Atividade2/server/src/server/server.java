@@ -1,28 +1,20 @@
-package com.mycompany.serverapplication;
+package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-
 import com.google.gson.Gson;
-
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;

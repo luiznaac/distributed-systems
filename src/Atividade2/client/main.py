@@ -28,12 +28,8 @@ class Handler(BaseHTTPRequestHandler):
 def make_request_to_server(request, request_content):
     global port
     url = server_address + request
-
     request_body = {**{'port': port}, **request_content}
-
     response = requests.post(url, json=request_body)
-
-    print(response.text)
 
     return json.loads(response.text)
 
