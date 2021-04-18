@@ -14,7 +14,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -50,17 +49,19 @@ public class server {
                 Map<String, Integer> jsonMap = mapper.readValue(requestBody, Map.class);
 
                 String response = "{\"available\": ";
+                Integer desiredResource = jsonMap.get("resource");
+                Integer clientPort = jsonMap.get("port");
 
-                if (jsonMap.get("resource") == 1) {
+                if (desiredResource == 1) {
                     response += String.valueOf(!resourceOneBeingUsed) + "}";
                     if (resourceOneBeingUsed) {
-                        resourceOneList.add(jsonMap.get("port"));
+                        resourceOneList.add(clientPort);
                     }
                     resourceOneBeingUsed = true;
                 } else {
                     response += String.valueOf(!resourceTwoBeingUsed) + "}";
                     if (resourceTwoBeingUsed) {
-                        resourceTwoList.add(jsonMap.get("port"));
+                        resourceTwoList.add(clientPort);
                     }
                     resourceTwoBeingUsed = true;
                 }
@@ -69,6 +70,8 @@ public class server {
                 OutputStream os = t.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
+
+                System.out.println("Client on port " + clientPort + " requested resource " + desiredResource);
             }
         }
     }
@@ -84,6 +87,7 @@ public class server {
                 String response = "{\"response\": \"Ok\"}";
 
                 if (jsonMap.get("resource") == 1) {
+                    System.out.println("Freeing resource 1");
                     resourceOneBeingUsed = false;
 
                     Iterator<Integer> itr = resourceOneList.iterator();
@@ -95,6 +99,7 @@ public class server {
                     }
 
                 } else {
+                    System.out.println("Freeing resource 2");
                     resourceTwoBeingUsed = false;
 
                     Iterator<Integer> itr = resourceTwoList.iterator();
@@ -114,7 +119,7 @@ public class server {
         }
     }
     
-    public static void sendClientResponseWithAvailableResource(String resourceName, int clientPort) throws MalformedURLException, IOException {
+    public static void sendClientResponseWithAvailableResource(String resourceName, int clientPort) throws IOException {
         String       postUrl       = "http://127.0.0.1:" + clientPort + "/resource-available";// put in your url
         Gson         gson          = new Gson();
         HttpClient   httpClient    = HttpClientBuilder.create().build();
@@ -127,5 +132,6 @@ public class server {
         post.setEntity(postingString);
         post.setHeader("Content-type", "application/json");
         HttpResponse  response = httpClient.execute(post);
+        System.out.println("Telling client on port "+ clientPort + " that resource " + resourceName + " is available");
     }
 }
