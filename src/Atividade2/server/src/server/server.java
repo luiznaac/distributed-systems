@@ -14,24 +14,23 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class server {
     
     public static boolean resourceOneBeingUsed;
-    public static LinkedHashSet<Integer> resourceOneList;
+    public static LinkedList<Integer> resourceOneList;
     
     public static boolean resourceTwoBeingUsed;
-    public static LinkedHashSet<Integer> resourceTwoList;
+    public static LinkedList<Integer> resourceTwoList;
 
     public static void main(String[] args) throws Exception {
         
         resourceOneBeingUsed = false;
         resourceTwoBeingUsed = false;
-        resourceOneList = new LinkedHashSet<Integer>();  
-        resourceTwoList = new LinkedHashSet<Integer>();  
+        resourceOneList = new LinkedList<Integer>();
+        resourceTwoList = new LinkedList<Integer>();
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/check-resource", new AccessResourceIntent());
@@ -90,24 +89,18 @@ public class server {
                     System.out.println("Freeing resource 1");
                     resourceOneBeingUsed = false;
 
-                    Iterator<Integer> itr = resourceOneList.iterator();
-                    while(itr.hasNext()){
-                        int port = itr.next();
-                        sendClientResponseWithAvailableResource("1", port);
-                        itr.remove();
-                        break;
+                    Integer nextClientPort = resourceOneList.poll();
+                    if(nextClientPort != null){
+                        sendClientResponseWithAvailableResource("1", nextClientPort);
                     }
 
                 } else {
                     System.out.println("Freeing resource 2");
                     resourceTwoBeingUsed = false;
 
-                    Iterator<Integer> itr = resourceTwoList.iterator();
-                    while(itr.hasNext()){
-                        int port = itr.next();
-                        sendClientResponseWithAvailableResource("2", port);
-                        itr.remove();
-                        break;
+                    Integer nextClientPort = resourceTwoList.poll();
+                    if(nextClientPort != null){
+                        sendClientResponseWithAvailableResource("2", nextClientPort);
                     }
                 }
 
