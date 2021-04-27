@@ -92,6 +92,7 @@ public class server {
                     Integer nextClientPort = resourceOneList.poll();
                     if(nextClientPort != null){
                         sendClientResponseWithAvailableResource("1", nextClientPort);
+                        resourceOneBeingUsed = true;
                     }
 
                 } else {
@@ -101,6 +102,7 @@ public class server {
                     Integer nextClientPort = resourceTwoList.poll();
                     if(nextClientPort != null){
                         sendClientResponseWithAvailableResource("2", nextClientPort);
+                        resourceTwoBeingUsed = true;
                     }
                 }
 
