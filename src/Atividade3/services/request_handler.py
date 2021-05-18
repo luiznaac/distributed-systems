@@ -4,6 +4,8 @@ import json
 
 def parse_request(request: BaseHTTPRequestHandler):
     content_len = int(request.headers.get('content-length', 0))
+    if content_len == 0:
+        return {}
     return {param.split('=')[0]: param.split('=')[1] for param in request.rfile.read(content_len).decode('utf-8').split('&')}
 
 
@@ -22,4 +24,4 @@ class RequestHandler:
         request.send_response(200)
         request.send_header('Content-type', 'application/json')
         request.end_headers()
-        request.wfile.write(bytes(json.dumps({'tid': response}), 'utf8'))
+        request.wfile.write(bytes(json.dumps(response), 'utf8'))
