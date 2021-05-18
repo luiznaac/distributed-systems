@@ -10,7 +10,7 @@ class TransactionsManagement:
 
     def start_or_get_transaction(self, user_id) -> Transaction:
         if user_id in self.user_tids.keys():
-            return self.user_tids[user_id]
+            return self.transactions[self.user_tids[user_id]]
 
         date_time = datetime.now().strftime("Y%m%d%%H%M%S")
         hash_generator = hashlib.sha256()
