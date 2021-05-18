@@ -22,4 +22,4 @@ class RequestHandler:
         request.send_response(200)
         request.send_header('Content-type', 'application/json')
         request.end_headers()
-        request.wfile.write(bytes(json.dumps({'message': response}), 'utf8'))
+        request.wfile.write(bytes(json.dumps({'tid': response}), 'utf8'))

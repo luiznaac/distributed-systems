@@ -14,13 +14,18 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def run(server_class=HTTPServer, handler_class=Handler):
-    global request_handler
-    hotel_management = HotelManagement()
-    request_handler = RequestHandler()
-    request_handler.link_handler('/bookRoom', hotel_management.book_room)
+    create_context()
     this_client_address = ('', 8080)
     httpd = server_class(this_client_address, handler_class)
     httpd.serve_forever()
+
+
+def create_context():
+    global request_handler
+    hotel_management = HotelManagement()
+    request_handler = RequestHandler()
+
+    request_handler.link_handler('/bookRoom', hotel_management.book_room)
 
 
 if __name__ == '__main__':
