@@ -6,7 +6,7 @@ def parse_request(request: BaseHTTPRequestHandler):
     content_len = int(request.headers.get('content-length', 0))
     if content_len == 0:
         return {}
-    return {param.split('=')[0]: param.split('=')[1] for param in request.rfile.read(content_len).decode('utf-8').split('&')}
+    return json.loads(request.rfile.read(content_len).decode('utf-8'))
 
 
 class RequestHandler:

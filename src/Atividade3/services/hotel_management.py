@@ -12,8 +12,8 @@ class HotelManagement:
         self.transactions_management = TransactionsManagement()
 
     def book_room(self, params):
-        user_tid = self.transactions_management.start_or_get_transaction(params['user_id'])
-        self.rooms_management.set_room_not_available(int(params['room_number']))
+        user_tid = self.transactions_management.start_or_get_transaction(params['userId'])
+        self.rooms_management.set_room_not_available(int(params['roomNumber']))
         return {'tid': user_tid}
 
     def commit(self, params):
