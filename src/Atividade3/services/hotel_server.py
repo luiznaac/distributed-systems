@@ -26,6 +26,7 @@ def create_context():
     request_handler = RequestHandler()
 
     request_handler.link_handler('/bookRoom', hotel_management.book_room)
+    request_handler.link_handler('/canCommit', hotel_management.can_commit)
     request_handler.link_handler('/finishTransaction', hotel_management.commit)
     request_handler.link_handler('/runningTransactions', hotel_management.running_transactions)
 
