@@ -1,10 +1,16 @@
 class RoomManagement:
 
-    rooms = {}
-
-    def __init__(self):
-        for i in range(1, 20):
-            self.rooms.update({i: 'available'})
-
-    def set_room_not_available(self, room_number):
-        self.rooms[room_number] = 'not_available'
+    def set_room_not_available(self, transaction, params):
+        transaction.insert_or_update(
+            'rooms',
+            {
+                'id': params['roomNumber'],
+                'userId': params['userId'],
+                'status': 'not_available',
+            },
+            {
+                'id': params['roomNumber'],
+                'userId': None,
+                'status': 'available',
+            }
+        )

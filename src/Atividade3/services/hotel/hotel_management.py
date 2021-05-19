@@ -13,14 +13,7 @@ class HotelManagement:
 
     def book_room(self, params):
         transaction = self.transactions_management.start_or_get_transaction(params['userId'])
-        transaction.insert_or_update(
-            'rooms',
-            {
-                'id': params['roomNumber'],
-                'userId': params['userId'],
-                'status': 'not_available',
-            }
-        )
+        self.rooms_management.set_room_not_available(transaction, params)
         return {'tid': transaction.tid}
 
     def can_commit(self, params):
