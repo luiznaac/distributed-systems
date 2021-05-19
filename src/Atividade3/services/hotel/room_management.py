@@ -1,7 +1,9 @@
+from transaction import Transaction
+
 class RoomManagement:
 
-    def set_room_not_available(self, transaction, params):
-        transaction.insert_or_update(
+    def set_room_not_available(self, transaction: Transaction, params):
+        transaction.update(
             'rooms',
             {
                 'id': params['roomNumber'],

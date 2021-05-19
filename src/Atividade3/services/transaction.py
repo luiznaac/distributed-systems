@@ -15,7 +15,7 @@ class Transaction:
         self.filepath = 'data/transactions/' + self.tid + '/'
         os.makedirs(self.filepath)
 
-    def insert_or_update(self, entity_name, set_values, conditions):
+    def update(self, entity_name, set_values, conditions):
         data_rows = persistence.get_file_data('data/persisted/', entity_name)
 
         if conditions['id'] not in data_rows.keys():
@@ -26,7 +26,7 @@ class Transaction:
         if not self.all_conditions_apply(row, conditions):
             return False
 
-        persistence.write_file_data(self.filepath, entity_name, {entity_name: {set_values['id']: set_values}})
+        self.temporarily_persist_entity_row(entity_name, row, set_values)
 
     def commit(self):
         files = os.listdir(self.filepath)
@@ -53,14 +53,32 @@ class Transaction:
                 return False
         return True
 
+    def temporarily_persist_entity_row(self, entity_name, row, new_values):
+        new_row = {new_values['id']: self.build_new_row(row, new_values)}
+        temporarily_rows = persistence.get_file_data(self.filepath, entity_name)
+
+        temporarily_rows = self.merge_rows(temporarily_rows, new_row)
+        persistence.write_file_data(self.filepath, entity_name, {entity_name: temporarily_rows})
+
+    def build_new_row(self, row, new_values):
+        for value_kew in new_values:
+            row[value_kew] = new_values[value_kew]
+        return new_values
+
     def persist_entity(self, entity_name):
         modified_rows = persistence.get_file_data(self.filepath, entity_name)
         actual_rows = persistence.get_file_data('data/persisted/', entity_name)
 
-        for modified_row_key in modified_rows:
-            actual_rows[modified_row_key] = modified_rows[modified_row_key]
+        new_rows = self.merge_rows(actual_rows, modified_rows)
+        persistence.write_file_data('data/persisted/', entity_name, {entity_name: new_rows})
 
-        persistence.write_file_data('data/persisted/', entity_name, {entity_name: actual_rows})
+    def merge_rows(self, rows_1: dict, rows_2: dict):
+        for row_key in rows_2:
+            if row_key in rows_1.keys():
+                rows_1[row_key] = rows_2[row_key]
+                continue
+            rows_1.update({row_key: rows_2[row_key]})
+        return rows_1
 
     def can_commit(self):
         return not self.has_running_operations and not self.did_any_operation_failed
