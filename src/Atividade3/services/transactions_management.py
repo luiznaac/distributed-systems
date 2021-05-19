@@ -27,9 +27,6 @@ class TransactionsManagement:
     def get_transaction(self, tid) -> Transaction:
         return self.transactions[tid]
 
-    def commit_transaction(self, tid):
-        if tid not in self.user_tids.values():
-            return False
-
+    def terminate_transaction(self, tid):
         self.user_tids = {user_id: user_tid for user_id, user_tid in self.user_tids.items() if user_tid != tid}
-        return True
+        self.transactions.pop(tid)

@@ -28,7 +28,13 @@ class HotelManagement:
 
     def commit(self, params):
         response = self.transactions_management.get_transaction(params['tid']).commit()
+        self.transactions_management.terminate_transaction(params['tid'])
         return {'status': 'committed' if response else 'tid not found'}
+
+    def rollback(self, params):
+        response = self.transactions_management.get_transaction(params['tid']).rollback()
+        self.transactions_management.terminate_transaction(params['tid'])
+        return {'status': 'rollbacked' if response else 'tid not found'}
 
     def running_transactions(self, _):
         return {'transactions': self.transactions_management.user_tids}

@@ -28,6 +28,13 @@ class Transaction:
         shutil.rmtree(self.filepath)
         return True
 
+    def rollback(self):
+        try:
+            shutil.rmtree(self.filepath)
+            return True
+        except:
+            return False
+
     def persist_entity(self, entity_name):
         modified_rows = persistence.get_file_data(self.filepath, entity_name)
         actual_rows = persistence.get_file_data('data/persisted/', entity_name)
