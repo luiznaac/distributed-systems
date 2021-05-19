@@ -3,7 +3,7 @@ import shutil
 import persistence
 from action import Action
 from threading import Thread
-import time
+import lock_management
 
 
 class Transaction:
@@ -11,6 +11,7 @@ class Transaction:
     tid = None
     filepath = None
     actions = []
+    owned_locks = []
 
     def __init__(self, tid):
         self.tid = tid
@@ -27,6 +28,7 @@ class Transaction:
         entity_name = params['entity_name']
         set_values = params['set_values']
         conditions = params['conditions']
+        self.get_lock(entity_name, conditions['id'])
         data_rows = self.get_rows_merged_with_transaction_ones(entity_name)
 
         if conditions['id'] not in data_rows.keys():
@@ -36,7 +38,6 @@ class Transaction:
 
         if not self.all_conditions_apply(row, conditions):
             return False
-        time.sleep(10)
 
         return self.temporarily_persist_entity_row(entity_name, row, set_values)
 
@@ -53,15 +54,26 @@ class Transaction:
         for entity in modified_entities:
             self.persist_entity(entity)
 
+        self.release_locks()
         shutil.rmtree(self.filepath)
         return True
 
     def rollback(self):
         try:
+            self.release_locks()
             shutil.rmtree(self.filepath)
             return True
         except:
             return False
+
+    def get_lock(self, entity_name, entity_id):
+        lock_uid = lock_management.resolve().get_lock(self.tid, entity_name, entity_id)
+        if lock_uid not in self.owned_locks:
+            self.owned_locks.append(lock_uid)
+
+    def release_locks(self):
+        for lock_uid in self.owned_locks:
+            lock_management.resolve().release_lock(lock_uid)
 
     def all_conditions_apply(self, row, conditions):
         for condition_key in conditions:
