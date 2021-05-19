@@ -28,6 +28,12 @@ class Transaction:
 
         self.temporarily_persist_entity_row(entity_name, row, set_values)
 
+    def select(self, entity_name, conditions):
+        rows_seen_by_transaction = self.get_rows_merged_with_transaction_ones(entity_name)
+
+        return {key: row_data for key, row_data in rows_seen_by_transaction.items()
+                if self.all_conditions_apply(row_data, conditions)}
+
     def commit(self):
         files = os.listdir(self.filepath)
         modified_entities = list(map(lambda file_name: file_name.strip('.txt'), files))
@@ -66,11 +72,14 @@ class Transaction:
         return new_values
 
     def persist_entity(self, entity_name):
-        modified_rows = persistence.get_file_data(self.filepath, entity_name)
-        actual_rows = persistence.get_file_data('data/persisted/', entity_name)
-
-        new_rows = self.merge_rows(actual_rows, modified_rows)
+        new_rows = self.get_rows_merged_with_transaction_ones(entity_name)
         persistence.write_file_data('data/persisted/', entity_name, {entity_name: new_rows})
+
+    def get_rows_merged_with_transaction_ones(self, entity_name):
+        actual_rows = persistence.get_file_data('data/persisted/', entity_name)
+        modified_rows = persistence.get_file_data(self.filepath, entity_name)
+
+        return self.merge_rows(actual_rows, modified_rows)
 
     def merge_rows(self, rows_1: dict, rows_2: dict):
         for row_key in rows_2:

@@ -1,6 +1,7 @@
 from datetime import datetime
 import hashlib
 from transaction import Transaction
+from typing import Optional
 
 
 class TransactionsManagement:
@@ -24,8 +25,10 @@ class TransactionsManagement:
 
         return transaction
 
-    def get_transaction(self, tid) -> Transaction:
-        return self.transactions[tid]
+    def get_transaction(self, tid) -> Optional[Transaction]:
+        if tid in self.transactions.keys():
+            return self.transactions[tid]
+        return self.start_or_get_transaction('ROOT')
 
     def terminate_transaction(self, tid):
         self.user_tids = {user_id: user_tid for user_id, user_tid in self.user_tids.items() if user_tid != tid}

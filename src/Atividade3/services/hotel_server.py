@@ -29,6 +29,8 @@ def create_context():
     request_handler.link_handler('/canCommit', hotel_management.can_commit)
     request_handler.link_handler('/finishTransaction', hotel_management.commit)
     request_handler.link_handler('/rollbackTransaction', hotel_management.rollback)
+    request_handler.link_handler('/getRooms', hotel_management.get_rooms)
+    request_handler.link_handler('/getAvailableRooms', hotel_management.get_available_rooms)
     request_handler.link_handler('/runningTransactions', hotel_management.running_transactions)
 
 
