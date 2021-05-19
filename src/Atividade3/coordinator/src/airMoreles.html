@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="icon" type="image/png" href="https://api.freelogodesign.org/files/84bfd477d3ee43a4b2effdef2f191a9e/thumb/logo_200x200.png"/>
+    <meta charset="UTF-8">
+    <title>AirMoreles</title>
+</head>
+<body>
+
+<main class="py-4">
+    <div class="container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">Faca sua reserva</div>
+                        <div class="card-body justify-content-center">
+                            <div class="row justify-content-center">
+                            <img src="https://api.freelogodesign.org/files/84bfd477d3ee43a4b2effdef2f191a9e/thumb/logo_200x200.png" alt="airmoreles" width="200" height="300"> 
+                            </div>
+                            <form method="POST" action="http://localhost:7000/login">
+                                <div class="form-group row">
+                                    <label for="room" class="col-md-4 col-form-label text-md-right">Quarto</label>
+                                    <div class="col-md-6">
+                                        <input id="room" type="number" class="form-control " name="room" value="">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="seat" class="col-md-4 col-form-label text-md-right">Assento</label>
+                                    <div class="col-md-6">
+                                        <input id="seat" type="number" class="form-control " name="seat" value="">
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-0">
+                                    <div class="col-md-8 offset-md-4">
+                                        <button type="submit" class="btn btn-primary">Fazer reserva</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
