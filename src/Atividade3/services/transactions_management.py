@@ -32,4 +32,4 @@ class TransactionsManagement:
 
     def terminate_transaction(self, tid):
         self.user_tids = {user_id: user_tid for user_id, user_tid in self.user_tids.items() if user_tid != tid}
-        self.transactions.pop(tid)
+        self.transactions.pop(tid, None)

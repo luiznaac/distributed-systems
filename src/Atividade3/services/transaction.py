@@ -4,6 +4,7 @@ import persistence
 from action import Action
 from threading import Thread
 import lock_management
+import time
 
 
 class Transaction:
@@ -38,6 +39,7 @@ class Transaction:
 
         if not self.all_conditions_apply(row, conditions):
             return False
+        time.sleep(10)
 
         return self.temporarily_persist_entity_row(entity_name, row, set_values)
 

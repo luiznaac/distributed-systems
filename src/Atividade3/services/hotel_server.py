@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from request_handler import RequestHandler
 from hotel.hotel_management import HotelManagement
+from socketserver import ThreadingMixIn
 
 request_handler: RequestHandler
 
@@ -13,11 +14,15 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def run(server_class=HTTPServer, handler_class=Handler):
+class ThreadingHandler(ThreadingMixIn, HTTPServer):
+    pass
+
+
+def run():
     create_context()
     this_client_address = ('', 8080)
-    httpd = server_class(this_client_address, handler_class)
-    httpd.serve_forever()
+    server = ThreadingHandler(this_client_address, Handler)
+    server.serve_forever()
 
 
 def create_context():
