@@ -32,13 +32,11 @@ class HotelManagement:
     def get_rooms(self, params):
         transaction = self.transactions_management.get_transaction(params['tid'])
         rooms = self.rooms_management.get_rooms(transaction)
-        transaction.rollback()
         return {'rooms': rooms}
 
     def get_available_rooms(self, params):
         transaction = self.transactions_management.get_transaction(params['tid'])
         rooms = self.rooms_management.get_available_rooms(transaction)
-        transaction.rollback()
         return {'rooms': rooms}
 
     def running_transactions(self, _):

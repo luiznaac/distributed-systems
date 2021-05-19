@@ -4,17 +4,20 @@ from transaction import Transaction
 class RoomManagement:
 
     def set_room_not_available(self, transaction: Transaction, params):
-        transaction.update(
-            'rooms',
+        transaction.start_action(
+            transaction.update,
             {
-                'id': params['roomNumber'],
-                'userId': params['userId'],
-                'status': 'not_available',
-            },
-            {
-                'id': params['roomNumber'],
-                'userId': None,
-                'status': 'available',
+                'entity_name': 'rooms',
+                'set_values': {
+                    'id': params['roomNumber'],
+                    'userId': params['userId'],
+                    'status': 'not_available',
+                },
+                'conditions': {
+                    'id': params['roomNumber'],
+                    'userId': None,
+                    'status': 'available',
+                }
             }
         )
 

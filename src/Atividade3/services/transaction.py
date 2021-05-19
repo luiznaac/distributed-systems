@@ -1,22 +1,33 @@
 import os
 import shutil
 import persistence
+from action import Action
+from threading import Thread
+import time
 
 
 class Transaction:
 
     tid = None
     filepath = None
-    has_running_operations = False
-    did_any_operation_failed = False
+    actions = []
 
     def __init__(self, tid):
         self.tid = tid
         self.filepath = 'data/transactions/' + self.tid + '/'
         os.makedirs(self.filepath)
 
-    def update(self, entity_name, set_values, conditions):
-        data_rows = persistence.get_file_data('data/persisted/', entity_name)
+    def start_action(self, desired_action, params):
+        action = Action(desired_action, params)
+        self.actions.append(action)
+        thread_action = Thread(target=action.perform)
+        thread_action.start()
+
+    def update(self, params):
+        entity_name = params['entity_name']
+        set_values = params['set_values']
+        conditions = params['conditions']
+        data_rows = self.get_rows_merged_with_transaction_ones(entity_name)
 
         if conditions['id'] not in data_rows.keys():
             return False
@@ -25,8 +36,9 @@ class Transaction:
 
         if not self.all_conditions_apply(row, conditions):
             return False
+        time.sleep(10)
 
-        self.temporarily_persist_entity_row(entity_name, row, set_values)
+        return self.temporarily_persist_entity_row(entity_name, row, set_values)
 
     def select(self, entity_name, conditions):
         rows_seen_by_transaction = self.get_rows_merged_with_transaction_ones(entity_name)
@@ -60,11 +72,15 @@ class Transaction:
         return True
 
     def temporarily_persist_entity_row(self, entity_name, row, new_values):
-        new_row = {new_values['id']: self.build_new_row(row, new_values)}
-        temporarily_rows = persistence.get_file_data(self.filepath, entity_name)
+        try:
+            new_row = {new_values['id']: self.build_new_row(row, new_values)}
+            temporarily_rows = persistence.get_file_data(self.filepath, entity_name)
 
-        temporarily_rows = self.merge_rows(temporarily_rows, new_row)
-        persistence.write_file_data(self.filepath, entity_name, {entity_name: temporarily_rows})
+            temporarily_rows = self.merge_rows(temporarily_rows, new_row)
+            persistence.write_file_data(self.filepath, entity_name, {entity_name: temporarily_rows})
+            return True
+        except:
+            return False
 
     def build_new_row(self, row, new_values):
         for value_kew in new_values:
@@ -90,4 +106,16 @@ class Transaction:
         return rows_1
 
     def can_commit(self):
-        return not self.has_running_operations and not self.did_any_operation_failed
+        return not self.has_failed_actions() and not self.has_running_actions()
+
+    def has_failed_actions(self):
+        for action in self.actions:
+            if action.status == 'failed':
+                return True
+        return False
+
+    def has_running_actions(self):
+        for action in self.actions:
+            while action.status == 'running':
+                pass
+        return False
