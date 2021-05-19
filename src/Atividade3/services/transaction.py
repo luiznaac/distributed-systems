@@ -4,19 +4,15 @@ import persistence
 from action import Action
 from threading import Thread
 import lock_management
-import time
 
 
 class Transaction:
 
-    tid = None
-    filepath = None
-    actions = []
-    owned_locks = []
-
     def __init__(self, tid):
         self.tid = tid
         self.filepath = 'data/transactions/' + self.tid + '/'
+        self.actions = []
+        self.owned_locks = []
         os.makedirs(self.filepath)
 
     def start_action(self, desired_action, params):

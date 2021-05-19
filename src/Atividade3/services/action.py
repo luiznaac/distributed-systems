@@ -1,9 +1,5 @@
 class Action:
 
-    status = None
-    function = None
-    params = None
-
     def __init__(self, function, params):
         self.status = 'running'
         self.function = function
@@ -16,3 +12,4 @@ class Action:
             return
 
         self.status = 'failed'
+        return
