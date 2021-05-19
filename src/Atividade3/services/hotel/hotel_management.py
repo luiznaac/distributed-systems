@@ -1,4 +1,4 @@
-from room_management import RoomManagement
+from hotel.room_management import RoomManagement
 from transactions_management import TransactionsManagement
 
 

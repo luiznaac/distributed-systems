@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from request_handler import RequestHandler
-from hotel_management import HotelManagement
+from hotel.hotel_management import HotelManagement
 
 request_handler: RequestHandler
 
