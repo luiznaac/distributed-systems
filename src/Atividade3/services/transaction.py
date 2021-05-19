@@ -115,7 +115,7 @@ class Transaction:
         return rows_1
 
     def can_commit(self):
-        return not self.has_failed_actions() and not self.has_running_actions()
+        return not self.has_running_actions() and not self.has_failed_actions()
 
     def has_failed_actions(self):
         for action in self.actions:
