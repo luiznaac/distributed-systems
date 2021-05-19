@@ -39,7 +39,6 @@ class Transaction:
 
         if not self.all_conditions_apply(row, conditions):
             return False
-        time.sleep(10)
 
         return self.temporarily_persist_entity_row(entity_name, row, set_values)
 

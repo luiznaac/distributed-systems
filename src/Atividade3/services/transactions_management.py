@@ -2,6 +2,7 @@ from datetime import datetime
 import hashlib
 from transaction import Transaction
 from typing import Optional
+import random
 
 
 class TransactionsManagement:
@@ -16,7 +17,7 @@ class TransactionsManagement:
         date_time = datetime.now().strftime("Y%m%d%%H%M%S")
         hash_generator = hashlib.sha256()
 
-        hash_generator.update(bytes(user_id + date_time, 'utf-8'))
+        hash_generator.update(bytes(user_id + date_time + str(random.randint(0, 200)), 'utf-8'))
         tid = hash_generator.hexdigest()
 
         transaction = Transaction(tid)
