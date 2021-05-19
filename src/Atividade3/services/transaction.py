@@ -1,5 +1,6 @@
 import os
-import json
+import shutil
+import persistence
 
 
 class Transaction:
@@ -15,9 +16,26 @@ class Transaction:
         os.makedirs(self.filepath)
 
     def insert_or_update(self, entity_name, params):
-        file = open(self.filepath + entity_name + '.txt', 'w+')
-        file.write(json.dumps({entity_name: params}, indent=2))
-        file.close()
+        persistence.write_file_data(self.filepath, entity_name, {entity_name: {params['id']: params}})
+
+    def commit(self):
+        files = os.listdir(self.filepath)
+        modified_entities = list(map(lambda file_name: file_name.strip('.txt'), files))
+
+        for entity in modified_entities:
+            self.persist_entity(entity)
+
+        shutil.rmtree(self.filepath)
+        return True
+
+    def persist_entity(self, entity_name):
+        modified_rows = persistence.get_file_data(self.filepath, entity_name)
+        actual_rows = persistence.get_file_data('data/persisted/', entity_name)
+
+        for modified_row_key in modified_rows:
+            actual_rows[modified_row_key] = modified_rows[modified_row_key]
+
+        persistence.write_file_data('data/persisted/', entity_name, {entity_name: actual_rows})
 
     def can_commit(self):
         return not self.has_running_operations and not self.did_any_operation_failed

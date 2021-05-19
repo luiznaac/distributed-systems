@@ -16,7 +16,8 @@ class HotelManagement:
         transaction.insert_or_update(
             'rooms',
             {
-                'roomNumber': params['roomNumber'],
+                'id': params['roomNumber'],
+                'userId': params['userId'],
                 'status': 'not_available',
             }
         )
@@ -26,7 +27,7 @@ class HotelManagement:
         return {'response': self.transactions_management.get_transaction(params['tid']).can_commit()}
 
     def commit(self, params):
-        response = self.transactions_management.commit_transaction(params['tid'])
+        response = self.transactions_management.get_transaction(params['tid']).commit()
         return {'status': 'committed' if response else 'tid not found'}
 
     def running_transactions(self, _):
